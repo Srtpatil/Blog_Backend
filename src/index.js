@@ -4,8 +4,10 @@ const bodyParser = require("body-parser");
 const User = require("./models/user.model");
 const Post = require("./models/Post.model");
 const Bookmark = require("./models/Bookmark.model");
-
-const bcrypt = require("bcrypt");
+const AuthToken = require("./models/Authtoken.model");
+const userRouter = require("./routes/userRouter");
+const postRouter = require("./routes/postRouter");
+const bookmarkRouter = require("./routes/bookmarkRouter");
 
 //define Associations
 //one to many --> user and post
@@ -19,6 +21,10 @@ Bookmark.belongsTo(User, { foreignKey: "user_id" });
 //A post can be bookmarked by multiple users
 Post.hasMany(Bookmark, { foreignKey: "post_id" });
 Bookmark.belongsTo(Post, { foreignKey: "post_id" });
+
+//A user can have many tokens
+User.hasMany(AuthToken, { foreignKey: "user_id" });
+AuthToken.belongsTo(User, { foreignKey: "user_id" });
 
 const app = express();
 
@@ -100,6 +106,15 @@ app.get("/", async (req, res) => {
 
 //Body Parser
 app.use(bodyParser.urlencoded({ extended: false }));
+
+//routes for user
+app.use("/user", userRouter);
+
+//routes for user
+app.use("/post", postRouter);
+
+//routes for user
+app.use("/bookmark", bookmarkRouter);
 
 //start the server
 const port = process.env.PORT || 8081;
