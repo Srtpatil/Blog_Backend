@@ -1,14 +1,11 @@
 const express = require("express");
-const sequelize = require("./db/Sequelize");
-const User = require("./models/user");
+require("./db/Sequelize");
+
 const app = express();
 
-app.get("/", (req, res) => {
-  res.send({
-    msg: "Hello World!",
-  });
-});
+app.get("/", (req, res) => {});
 
+//start the server
 const port = process.env.PORT || 8081;
 sequelize
   .sync()
