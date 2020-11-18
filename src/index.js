@@ -1,8 +1,11 @@
 const express = require("express");
 const sequelize = require("./db/Sequelize");
+const bodyParser = require("body-parser");
 const User = require("./models/user.model");
 const Post = require("./models/Post.model");
 const Bookmark = require("./models/Bookmark.model");
+
+const bcrypt = require("bcrypt");
 
 //define Associations
 //one to many --> user and post
@@ -26,22 +29,27 @@ const app = express();
 //   summary: "first post summary",
 //   likes: 144,
 //   is_published: true,
-//   user_id: "59583330-297f-11eb-a383-3d9f979e6bf0",
+//   user_id: "e593e110-2992-11eb-906d-d1b8941196a5",
 // }).catch((err) => {
 //   console.log("err ", err);
 // });
 
 // User.create({
-//   name: "samarth",
-//   email: "ex@gmail.com",
-//   username: "Aries",
-//   password: "test",
-//   description: "Something",
+//   name: "Yo",
+//   email: "yo@gmail.com",
+//   username: "oyo",
+//   password: "string",
+//   description: "yo !",
 // });
 
 // Bookmark.create({
-//   user_id: "44f6a6a0-2980-11eb-940a-41d45f24bf11",
-//   post_id: "2192f050-2981-11eb-a89d-5f178c75a520",
+//   user_id: "e593e110-2992-11eb-906d-d1b8941196a5",
+//   post_id: "062d3750-2993-11eb-9e35-99dcb277a35f",
+// });
+
+// let pass2 = "$2b$10$/fWG8dYHccgNAFe/w435huNDyiHQmjIRu0TKIeFb1YV84cXE2Bj0y";
+// bcrypt.compare("string", pass2).then((res) => {
+//   console.log("---------- ---", res);
 // });
 
 app.get("/", async (req, res) => {
@@ -58,7 +66,7 @@ app.get("/", async (req, res) => {
 
   //find bookmarks of a user
   // const users = await User.findAll({
-  //   where: { user_id: "44f6a6a0-2980-11eb-940a-41d45f24bf11" },
+  //   where: { user_id: "e593e110-2992-11eb-906d-d1b8941196a5" },
   //   include: [{ model: Bookmark }],
   // });
 
@@ -70,15 +78,28 @@ app.get("/", async (req, res) => {
   //   where: { post_id: PostId },
   // });
 
-  const post = await Bookmark.findAll({
-    where: { user_id: "44f6a6a0-2980-11eb-940a-41d45f24bf11" },
-    include: [{ model: Post }, { model: User }],
+  // const post = await Bookmark.findAll({
+  //   where: { user_id: "44f6a6a0-2980-11eb-940a-41d45f24bf11" },
+  //   include: [{ model: Post }],
+  // });
+
+  // const authorId = post[0].post.user_id;
+
+  // const author = await User.findOne({
+  //   where: { user_id: authorId },
+  // });
+
+  const data = await Bookmark.findAll({
+    where: { user_id: "e593e110-2992-11eb-906d-d1b8941196a5" },
+    include: [{ model: Post }],
   });
 
   // const data = JSON.stringify(users);
-  console.log("data ", post);
-  res.send(post);
+  res.send(data);
 });
+
+//Body Parser
+app.use(bodyParser.urlencoded({ extended: false }));
 
 //start the server
 const port = process.env.PORT || 8081;
