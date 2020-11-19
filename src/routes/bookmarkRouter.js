@@ -1,7 +1,8 @@
 const express = require("express");
-const { Op } = require("sequelize/types");
+const { Op } = require("sequelize");
 const router = express.Router();
 const Bookmark = require("../models/Bookmark.model");
+const Post = require("../models/Post.model");
 
 //create bookmark
 router.post("/add", async (req, res) => {
@@ -65,3 +66,6 @@ router.delete("/:postId&:userId", async (req, res) => {
     res.status(400).send(err);
   }
 });
+
+module.exports = router;
+

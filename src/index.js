@@ -4,7 +4,8 @@ const bodyParser = require("body-parser");
 const User = require("./models/user.model");
 const Post = require("./models/Post.model");
 const Bookmark = require("./models/Bookmark.model");
-const AuthToken = require("./models/Authtoken.model");
+const cors = require("cors");
+// const AuthToken = require("./models/Authtoken.model");
 const userRouter = require("./routes/userRouter");
 const postRouter = require("./routes/postRouter");
 const bookmarkRouter = require("./routes/bookmarkRouter");
@@ -23,10 +24,12 @@ Post.hasMany(Bookmark, { foreignKey: "post_id" });
 Bookmark.belongsTo(Post, { foreignKey: "post_id" });
 
 //A user can have many tokens
-User.hasMany(AuthToken, { foreignKey: "user_id" });
-AuthToken.belongsTo(User, { foreignKey: "user_id" });
+// User.hasMany(AuthToken, { foreignKey: "user_id" });
+// AuthToken.belongsTo(User, { foreignKey: "user_id" });
 
 const app = express();
+
+app.use(cors());
 
 //Store Data
 // Post.create({
@@ -58,54 +61,9 @@ const app = express();
 //   console.log("---------- ---", res);
 // });
 
-app.get("/", async (req, res) => {
-  //find all posts associated with user
-  // const users = await User.findAll({
-  //   where: { user_id: "ca489c70-2979-11eb-a131-973bc6a33ea4" },
-  //   include: [{ model: Post }],
-  // });
-
-  //find a post from its id
-  // const users = await Post.findAll({
-  //   include: User,
-  // });
-
-  //find bookmarks of a user
-  // const users = await User.findAll({
-  //   where: { user_id: "e593e110-2992-11eb-906d-d1b8941196a5" },
-  //   include: [{ model: Bookmark }],
-  // });
-
-  // //loop through array
-  // const PostId = users[0].bookmarks[0].post_id;
-
-  // //find post with that id
-  // const post = await Post.findOne({
-  //   where: { post_id: PostId },
-  // });
-
-  // const post = await Bookmark.findAll({
-  //   where: { user_id: "44f6a6a0-2980-11eb-940a-41d45f24bf11" },
-  //   include: [{ model: Post }],
-  // });
-
-  // const authorId = post[0].post.user_id;
-
-  // const author = await User.findOne({
-  //   where: { user_id: authorId },
-  // });
-
-  const data = await Bookmark.findAll({
-    where: { user_id: "e593e110-2992-11eb-906d-d1b8941196a5" },
-    include: [{ model: Post }],
-  });
-
-  // const data = JSON.stringify(users);
-  res.send(data);
-});
-
 //Body Parser
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
 
 //routes for user
 app.use("/user", userRouter);

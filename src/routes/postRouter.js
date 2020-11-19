@@ -158,3 +158,6 @@ router.get("/allPosts/:userId", async (req, res) => {
 
 //delete a post
 router.delete("/:postId", async (req, res) => {});
+
+module.exports = router;
+
