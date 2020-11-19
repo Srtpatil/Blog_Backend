@@ -32,6 +32,22 @@ const User = sequelize.define("user", {
   description: DataTypes.TEXT,
 });
 
+//Add user authenticate method
+User.authenticate = async (email, password) => {
+  const user = await User.findOne({
+    where: {
+      email,
+    },
+  });
+
+  if (!user) {
+    return new Error("Invalid Email or Password");
+  } else if (bcrypt.compareSync(password, user.password)) {
+    return user;
+  }
+  return new Error("Invalid Email or Password");
+};
+
 function generateHash(user) {
   if (user === null) {
     throw new Error("No found employee");
