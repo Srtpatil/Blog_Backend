@@ -29,6 +29,11 @@ const Post = sequelize.define("post", {
   },
   is_published: {
     type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  is_drafted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
 });
 

@@ -83,7 +83,11 @@ router.get("/me/:userId", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.authenticate(email, password);
+    const user = await User.authenticate(email, password).catch((err) => {
+      console.log(err);
+      return res.status(401).send({ error: err.message });
+    });
+
     const payload = {
       id: user.user_id,
       exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days
@@ -102,7 +106,8 @@ router.post("/login", async (req, res) => {
       });
     });
   } catch (err) {
-    return res.send(err);
+    console.log(err);
+    res.status(401).send({ err: error });
   }
 });
 
