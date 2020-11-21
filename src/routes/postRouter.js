@@ -1,25 +1,37 @@
 const express = require("express");
+const { model } = require("../db/Sequelize");
 const Post = require("../models/Post.model");
-const { sum } = require("../models/user.model");
 const User = require("../models/user.model");
+const Auth = require("../middlewares/Auth")();
 const router = express.Router();
 
 //create a post or draft
-router.post("/add", async (req, res) => {
-  let { title, content, summary, is_published } = req.body;
+router.post("/add", Auth.authenticate(), async (req, res) => {
+  let { title, content, summary, is_published, user_id } = req.body;
+  console.log("POst info ", req.body);
+  let post;
   try {
-    await Post.create({
+    title = title.replace("<br>", "");
+    post = await Post.create({
       title,
       content,
       summary,
       is_published,
+      user_id,
+    }).catch((err) => {
+      return res.status(400).send({
+        error: err.message,
+      });
     });
 
     return res.status(200).send({
+      post,
       msg: "Post added Successfully",
     });
   } catch (err) {
-    res.status(404).send(err);
+    res.status(404).send({
+      error: err.message,
+    });
   }
 });
 
@@ -98,9 +110,10 @@ router.get("/latest_posts/:page", async (req, res) => {
   try {
     const posts = await Post.findAll({
       where: { is_published: true },
+      include: [{ model: User }],
       offset: (page - 1) * 10,
       limit: 10,
-      order: ["updatedAt", "DESC"],
+      order: [["updatedAt", "DESC"]],
     });
 
     if (!posts) {
@@ -123,6 +136,7 @@ router.get("/:postId", async (req, res) => {
       where: {
         post_id: post_id,
       },
+      include: [{ model: User }],
     });
 
     return res.status(200).send({
@@ -160,4 +174,3 @@ router.get("/allPosts/:userId", async (req, res) => {
 router.delete("/:postId", async (req, res) => {});
 
 module.exports = router;
-

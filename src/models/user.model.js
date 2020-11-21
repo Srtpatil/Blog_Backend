@@ -41,11 +41,11 @@ User.authenticate = async (email, password) => {
   });
 
   if (!user) {
-    return new Error("Invalid Email or Password");
+    throw new Error("Invalid Email or Password");
   } else if (bcrypt.compareSync(password, user.password)) {
     return user;
   }
-  return new Error("Invalid Email or Password");
+  throw new Error("Invalid Email or Password");
 };
 
 function generateHash(user) {
