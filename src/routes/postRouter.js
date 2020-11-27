@@ -2,38 +2,40 @@ const express = require("express");
 const { model } = require("../db/Sequelize");
 const Post = require("../models/Post.model");
 const User = require("../models/user.model");
-const Auth = require("../middlewares/Auth")();
 const router = express.Router();
 
 //create a post or draft
-router.post("/add", Auth.authenticate(), async (req, res) => {
-  let { title, content, summary, is_published, user_id } = req.body;
-  console.log("POst info ", req.body);
-  let post;
-  try {
-    title = title.replace("<br>", "");
-    post = await Post.create({
-      title,
-      content,
-      summary,
-      is_published,
-      user_id,
-    }).catch((err) => {
-      return res.status(400).send({
+router.post(
+  "/add",
+  async (req, res) => {
+    let { title, content, summary, is_published, user_id } = req.body;
+    console.log("Post info ", req.body);
+    let post;
+    try {
+      title = title.replace("<br>", "");
+      post = await Post.create({
+        title,
+        content,
+        summary,
+        is_published,
+        user_id,
+      }).catch((err) => {
+        return res.status(400).send({
+          error: err.message,
+        });
+      });
+
+      return res.status(200).send({
+        post,
+        msg: "Post added Successfully",
+      });
+    } catch (err) {
+      res.status(404).send({
         error: err.message,
       });
-    });
-
-    return res.status(200).send({
-      post,
-      msg: "Post added Successfully",
-    });
-  } catch (err) {
-    res.status(404).send({
-      error: err.message,
-    });
+    }
   }
-});
+);
 
 //update a post or draft
 router.patch("/edit/:postId", async (req, res) => {

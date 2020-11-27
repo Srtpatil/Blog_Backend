@@ -24,7 +24,7 @@ const User = sequelize.define("user", {
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false,
+    // allowNull: false,
   },
   profilePicPath: {
     type: DataTypes.STRING,

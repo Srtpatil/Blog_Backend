@@ -9,6 +9,9 @@ const cors = require("cors");
 const userRouter = require("./routes/userRouter");
 const postRouter = require("./routes/postRouter");
 const bookmarkRouter = require("./routes/bookmarkRouter");
+const authRouter = require("./routes/authRouter");
+const passport = require("passport");
+require("./middlewares/Auth");
 
 //define Associations
 //one to many --> user and post
@@ -30,36 +33,7 @@ Bookmark.belongsTo(Post, { foreignKey: "post_id" });
 const app = express();
 
 app.use(cors());
-
-//Store Data
-// Post.create({
-//   title: "Something Funny",
-//   content: { address1: "123 test street", city: "Los Angeles", state: "CA" },
-//   summary: "first post summary",
-//   likes: 144,
-//   is_published: true,
-//   user_id: "e593e110-2992-11eb-906d-d1b8941196a5",
-// }).catch((err) => {
-//   console.log("err ", err);
-// });
-
-// User.create({
-//   name: "Yo",
-//   email: "yo@gmail.com",
-//   username: "oyo",
-//   password: "string",
-//   description: "yo !",
-// });
-
-// Bookmark.create({
-//   user_id: "e593e110-2992-11eb-906d-d1b8941196a5",
-//   post_id: "062d3750-2993-11eb-9e35-99dcb277a35f",
-// });
-
-// let pass2 = "$2b$10$/fWG8dYHccgNAFe/w435huNDyiHQmjIRu0TKIeFb1YV84cXE2Bj0y";
-// bcrypt.compare("string", pass2).then((res) => {
-//   console.log("---------- ---", res);
-// });
+app.use(passport.initialize());
 
 //Body Parser
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -74,10 +48,15 @@ app.use("/post", postRouter);
 //routes for user
 app.use("/bookmark", bookmarkRouter);
 
+//routes for auth
+app.use("/auth", authRouter);
+
 //start the server
 const port = process.env.PORT || 8081;
 sequelize
-  .sync()
+  .sync({
+    // force: true,
+  })
   .then(() => {
     console.log("Connected to Database Successfully.");
     app.listen(port, () => {

@@ -3,7 +3,6 @@ const User = require("../models/user.model");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
-const Auth = require("../middlewares/Auth")();
 require("dotenv").config();
 
 //create user
@@ -79,36 +78,26 @@ router.get("/me/:userId", async (req, res) => {
   }
 });
 
-//login user
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const user = await User.authenticate(email, password).catch((err) => {
-      console.log(err);
-      return res.status(401).send({ error: err.message });
-    });
-
-    const payload = {
-      id: user.user_id,
-      exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days
-    };
-
-    console.log("User confirmed , creating token..");
-
-    jwt.sign(payload, process.env.JWT_SECRET, (err, token) => {
-      if (err) {
-        return res.send(err);
+// login user
+router.post("/login", async function (req, res, next) {
+  passport.authenticate(
+    "local",
+    {
+      session: false,
+    },
+    (err, user, info) => {
+      console.log("USER: ", user, " ", err);
+      if (err || !user) {
+        return res.status(400).json({
+          error: info,
+          user: user,
+        });
       }
 
-      return res.send({
-        user: user,
-        token: token,
-      });
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(401).send({ err: error });
-  }
+      const token = jwt.sign(user.user_id, process.env.JWT_SECRET);
+      return res.json({ user, token });
+    }
+  )(req, res);
 });
 
 module.exports = router;

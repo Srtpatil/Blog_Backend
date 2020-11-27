@@ -21,7 +21,7 @@ const Post = sequelize.define("post", {
     },
   },
   summary: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
   },
   likes: {
     type: DataTypes.INTEGER,
