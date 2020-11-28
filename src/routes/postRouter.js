@@ -4,10 +4,26 @@ const Post = require("../models/Post.model");
 const User = require("../models/user.model");
 const router = express.Router();
 
+//create summary from editor js content
+function createSummary(content) {
+  const blocks = content.blocks;
+  let firstParagraphText;
+
+  for (let i = 0; i < blocks.length; i++) {
+    if (blocks[i].type == "paragraph") {
+      firstParagraphText = blocks[i].data.text;
+      return firstParagraphText.replace("<br>", "");
+    }
+  }
+
+  const summary = "Enjoy The Read !";
+  return summary;
+}
+
 //create a post or draft
-router.post("/add", async (req, res) => {
-  let { title, content, summary, is_published, is_drafted, user_id } = req.body;
-  console.log("Post info ", req.body);
+router.post("/add", Auth.authenticate(), async (req, res) => {
+  let { title, content, is_published, user_id } = req.body;
+  const summary = createSummary(content);
   let post;
   try {
     title = title.replace("<br>", "");
@@ -39,12 +55,13 @@ router.post("/add", async (req, res) => {
 });
 
 //update a post or draft
-router.patch("/edit/:postId", async (req, res) => {
+router.patch("/edit/:postId", Auth.authenticate(), async (req, res) => {
   const post_id = req.params.postId;
-  let { title, content, summary, is_published, is_drafted } = req.body;
+  let { title, content, is_published, is_drafted } = req.body;
   title = title.replace("<br>", "");
   title = title.replace("<div>", "");
   title = title.replace("</div>", "");
+  const summary = createSummary(content);
   try {
     const post = await Post.update(
       {
@@ -59,12 +76,15 @@ router.patch("/edit/:postId", async (req, res) => {
           post_id: post_id,
         },
       }
-    );
+    ).catch((err) => {
+      console.log(err);
+    });
+
     return res.status(200).send({
       msg: "Post Updated Successfully",
     });
   } catch (err) {
-    res.status(404).send(err);
+    res.status(400).send(err);
   }
 });
 
@@ -177,6 +197,8 @@ router.get("/allPosts/:userId", async (req, res) => {
     res.status(400).send(err);
   }
 });
+
+//get all drafts of a user
 
 //delete a post
 router.delete("/:postId", async (req, res) => {

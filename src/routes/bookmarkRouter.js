@@ -14,7 +14,7 @@ router.post("/add", async (req, res) => {
       post_id,
     });
 
-    return res.status(200).send({
+    return res.status(201).send({
       msg: "Post Bookmarked",
     });
   } catch (err) {
@@ -68,4 +68,3 @@ router.delete("/:postId&:userId", async (req, res) => {
 });
 
 module.exports = router;
-
