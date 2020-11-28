@@ -5,49 +5,54 @@ const User = require("../models/user.model");
 const router = express.Router();
 
 //create a post or draft
-router.post(
-  "/add",
-  async (req, res) => {
-    let { title, content, summary, is_published, user_id } = req.body;
-    console.log("Post info ", req.body);
-    let post;
-    try {
-      title = title.replace("<br>", "");
-      post = await Post.create({
-        title,
-        content,
-        summary,
-        is_published,
-        user_id,
-      }).catch((err) => {
-        return res.status(400).send({
-          error: err.message,
-        });
-      });
+router.post("/add", async (req, res) => {
+  let { title, content, summary, is_published, is_drafted, user_id } = req.body;
+  console.log("Post info ", req.body);
+  let post;
+  try {
+    title = title.replace("<br>", "");
+    title = title.replace("<div>", "");
+    title = title.replace("</div>", "");
 
-      return res.status(200).send({
-        post,
-        msg: "Post added Successfully",
-      });
-    } catch (err) {
-      res.status(404).send({
+    post = await Post.create({
+      title,
+      content,
+      summary,
+      is_published,
+      is_drafted,
+      user_id,
+    }).catch((err) => {
+      return res.status(400).send({
         error: err.message,
       });
-    }
+    });
+
+    return res.status(200).send({
+      post,
+      msg: "Post added Successfully",
+    });
+  } catch (err) {
+    res.status(404).send({
+      error: err.message,
+    });
   }
-);
+});
 
 //update a post or draft
 router.patch("/edit/:postId", async (req, res) => {
   const post_id = req.params.postId;
-  const { title, content, summary } = req.body;
-
+  let { title, content, summary, is_published, is_drafted } = req.body;
+  title = title.replace("<br>", "");
+  title = title.replace("<div>", "");
+  title = title.replace("</div>", "");
   try {
     const post = await Post.update(
       {
         title: title,
         content: content,
         summary: summary,
+        is_published: is_published,
+        is_drafted: is_drafted,
       },
       {
         where: {
