@@ -26,7 +26,8 @@ router.post(
   "/add",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    let { title, content, is_published, user_id } = req.body;
+    console.log("HEVBJ ----- ");
+    let { title, content, is_published, user_id, is_drafted } = req.body;
     const summary = createSummary(content);
     let post;
     try {
@@ -240,9 +241,7 @@ router.get("/draft/:userId", async (req, res) => {
         user_id: user_id,
         is_drafted: true,
       },
-      order:[
-        ['updatedAt','DESC'],
-      ],
+      order: [["updatedAt", "DESC"]],
       include: [{ model: User }],
     });
 

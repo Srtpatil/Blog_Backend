@@ -94,7 +94,11 @@ router.post("/login", async function (req, res) {
         });
       }
 
-      const token = jwt.sign(user.user_id, process.env.JWT_SECRET);
+      const payload = {
+        id: user.user_id,
+      };
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET);
       return res.json({ user, token });
     }
   )(req, res);
