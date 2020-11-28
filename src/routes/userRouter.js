@@ -79,7 +79,7 @@ router.get("/me/:userId", async (req, res) => {
 });
 
 // login user
-router.post("/login", async function (req, res, next) {
+router.post("/login", async function (req, res) {
   passport.authenticate(
     "local",
     {

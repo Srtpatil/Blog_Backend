@@ -1,4 +1,5 @@
 const express = require("express");
+const passport = require("passport");
 const { model } = require("../db/Sequelize");
 const Post = require("../models/Post.model");
 const User = require("../models/user.model");
@@ -21,72 +22,80 @@ function createSummary(content) {
 }
 
 //create a post or draft
-router.post("/add", Auth.authenticate(), async (req, res) => {
-  let { title, content, is_published, user_id } = req.body;
-  const summary = createSummary(content);
-  let post;
-  try {
+router.post(
+  "/add",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let { title, content, is_published, user_id } = req.body;
+    const summary = createSummary(content);
+    let post;
+    try {
+      title = title.replace("<br>", "");
+      title = title.replace("<div>", "");
+      title = title.replace("</div>", "");
+
+      post = await Post.create({
+        title,
+        content,
+        summary,
+        is_published,
+        is_drafted,
+        user_id,
+      }).catch((err) => {
+        return res.status(400).send({
+          error: err.message,
+        });
+      });
+
+      return res.status(200).send({
+        post,
+        msg: "Post added Successfully",
+      });
+    } catch (err) {
+      res.status(404).send({
+        error: err.message,
+      });
+    }
+  }
+);
+
+//update a post or draft
+router.patch(
+  "/edit/:postId",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const post_id = req.params.postId;
+    let { title, content, is_published, is_drafted } = req.body;
     title = title.replace("<br>", "");
     title = title.replace("<div>", "");
     title = title.replace("</div>", "");
-
-    post = await Post.create({
-      title,
-      content,
-      summary,
-      is_published,
-      is_drafted,
-      user_id,
-    }).catch((err) => {
-      return res.status(400).send({
-        error: err.message,
-      });
-    });
-
-    return res.status(200).send({
-      post,
-      msg: "Post added Successfully",
-    });
-  } catch (err) {
-    res.status(404).send({
-      error: err.message,
-    });
-  }
-});
-
-//update a post or draft
-router.patch("/edit/:postId", Auth.authenticate(), async (req, res) => {
-  const post_id = req.params.postId;
-  let { title, content, is_published, is_drafted } = req.body;
-  title = title.replace("<br>", "");
-  title = title.replace("<div>", "");
-  title = title.replace("</div>", "");
-  const summary = createSummary(content);
-  try {
-    const post = await Post.update(
-      {
-        title: title,
-        content: content,
-        summary: summary,
-        is_published: is_published,
-        is_drafted: is_drafted,
-      },
-      {
-        where: {
-          post_id: post_id,
+    const summary = createSummary(content);
+    try {
+      const post = await Post.update(
+        {
+          title: title,
+          content: content,
+          summary: summary,
+          is_published: is_published,
+          is_drafted: is_drafted,
         },
-      }
-    ).catch((err) => {
-      console.log(err);
-    });
+        {
+          where: {
+            post_id: post_id,
+          },
+        }
+      ).catch((err) => {
+        console.log(err);
+      });
 
-    return res.status(200).send({
-      msg: "Post Updated Successfully",
-    });
-  } catch (err) {
-    res.status(400).send(err);
+      return res.status(200).send({
+        msg: "Post Updated Successfully",
+      });
+    } catch (err) {
+      res.status(400).send(err);
+    }
   }
-});
+);
 
 //publish a draft
 router.patch("/publish-draft/:postId", async (req, res) => {
