@@ -163,6 +163,7 @@ router.get("/allPosts/:userId", async (req, res) => {
       where: {
         user_id: user_id,
       },
+      include: [{ model: User }],
     });
 
     if (!posts) {
@@ -178,6 +179,52 @@ router.get("/allPosts/:userId", async (req, res) => {
 });
 
 //delete a post
-router.delete("/:postId", async (req, res) => {});
+router.delete("/:postId", async (req, res) => {
+  const post_id = req.params.postId;
+  try {
+    const post = await Post.destroy({
+      where: {
+        post_id: post_id,
+      },
+    }).catch((err) => {
+      return res.status(400).send({
+        error: err.message,
+      });
+    });
+
+    return res.status(200).send({
+      msg: "Post Deleted Successfully",
+    });
+  } catch (err) {
+    return res.status(400).send(err);
+  }
+});
+
+//get user draft
+router.get("/draft/:userId", async (req, res) => {
+  const user_id = req.params.userId;
+  try {
+    const posts = await Post.findAll({
+      where: {
+        user_id: user_id,
+        is_drafted: true,
+      },
+      order:[
+        ['updatedAt','DESC'],
+      ],
+      include: [{ model: User }],
+    });
+
+    if (!posts) {
+      return res.status(404).send({
+        msg: "Drafts not Found",
+      });
+    }
+
+    return res.send(posts);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
 
 module.exports = router;
