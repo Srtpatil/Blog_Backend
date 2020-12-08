@@ -2,7 +2,9 @@ const express = require("express");
 const passport = require("passport");
 const { model } = require("../db/Sequelize");
 const Post = require("../models/Post.model");
+const fetch = require("node-fetch");
 const User = require("../models/user.model");
+require("dotenv").config();
 const router = express.Router();
 
 //create summary from editor js content
@@ -213,6 +215,18 @@ router.get("/allPosts/:userId", async (req, res) => {
 //delete a post
 router.delete("/:postId", async (req, res) => {
   const post_id = req.params.postId;
+  console.log(req.body);
+  let { blocks } = req.body;
+  for (let i = 0; i < blocks.length; i++) {
+    if (blocks[i].type === "image") {
+      //make a delete request to image service
+      let path = blocks[i].data.file.url;
+      fetch(`${process.env.IMG_API}image/delete?path=${path}`, {
+        method: "DELETE",
+      });
+    }
+  }
+
   try {
     const post = await Post.destroy({
       where: {
