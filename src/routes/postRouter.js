@@ -187,15 +187,31 @@ router.get("/:postId", async (req, res) => {
 });
 
 //get a users all posts
-router.get("/allPosts/:userId", async (req, res) => {
+router.get("/allPosts/:userId&:page", async (req, res) => {
   const user_id = req.params.userId;
+  const page = req.params.page;
 
   try {
-    const posts = await Post.findAll({
+    const user = await User.findOne({
       where: {
         user_id: user_id,
       },
-      include: [{ model: User }],
+    });
+
+    if (!user) {
+      return res.status(404).send({
+        msg: "User not Found",
+      });
+    }
+
+    const posts = await Post.findAll({
+      where: {
+        user_id: user_id,
+        is_published: true,
+      },
+      offset: (page - 1) * 10,
+      limit: 10,
+      order: [["updatedAt", "DESC"]],
     });
 
     if (!posts) {
@@ -203,8 +219,7 @@ router.get("/allPosts/:userId", async (req, res) => {
         msg: "Posts not Found",
       });
     }
-
-    return res.send(posts);
+    return res.send({ posts: posts, user: user });
   } catch (err) {
     res.status(400).send(err);
   }
@@ -213,38 +228,43 @@ router.get("/allPosts/:userId", async (req, res) => {
 //get all drafts of a user
 
 //delete a post
-router.delete("/:postId", async (req, res) => {
-  const post_id = req.params.postId;
-  console.log(req.body);
-  let { blocks } = req.body;
-  for (let i = 0; i < blocks.length; i++) {
-    if (blocks[i].type === "image") {
-      //make a delete request to image service
-      let path = blocks[i].data.file.url;
-      fetch(`${process.env.IMG_API}image/delete?path=${path}`, {
-        method: "DELETE",
+router.delete(
+  "/:postId",
+  // passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    console.log("Here!");
+    const post_id = req.params.postId;
+    console.log("BODY: ", req.body);
+    let { blocks } = req.body;
+    for (let i = 0; i < blocks.length; i++) {
+      if (blocks[i].type === "image") {
+        //make a delete request to image service
+        let path = blocks[i].data.file.url;
+        fetch(`${process.env.IMG_API}image/delete?path=${path}`, {
+          method: "DELETE",
+        });
+      }
+    }
+
+    try {
+      const post = await Post.destroy({
+        where: {
+          post_id: post_id,
+        },
+      }).catch((err) => {
+        return res.status(400).send({
+          error: err.message,
+        });
       });
+
+      return res.status(200).send({
+        msg: "Post Deleted Successfully",
+      });
+    } catch (err) {
+      return res.status(400).send(err);
     }
   }
-
-  try {
-    const post = await Post.destroy({
-      where: {
-        post_id: post_id,
-      },
-    }).catch((err) => {
-      return res.status(400).send({
-        error: err.message,
-      });
-    });
-
-    return res.status(200).send({
-      msg: "Post Deleted Successfully",
-    });
-  } catch (err) {
-    return res.status(400).send(err);
-  }
-});
+);
 
 //get user draft
 router.get("/draft/:userId", async (req, res) => {
