@@ -11,6 +11,7 @@ const postRouter = require("./routes/postRouter");
 const bookmarkRouter = require("./routes/bookmarkRouter");
 const authRouter = require("./routes/authRouter");
 const passport = require("passport");
+const cookieSession = require("cookie-session");
 require("./middlewares/Auth");
 
 //define Associations
@@ -32,8 +33,26 @@ Bookmark.belongsTo(Post, { foreignKey: "post_id" });
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cookieSession({
+    name: "session",
+    keys: [process.env.COOKIE_KEY],
+    maxAge: 24 * 60 * 60 * 100,
+  })
+);
+
 app.use(passport.initialize());
+// deserialize cookie from the browser
+app.use(passport.session());
+
+// set up cors to allow us to accept requests from our client
+app.use(
+  cors({
+    origin: process.env.CLIENT_HOME_PAGE_URL, // allow to server to accept request from different origin
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true, // allow session cookie from browser to pass through
+  })
+);
 
 //Body Parser
 app.use(bodyParser.urlencoded({ extended: false }));
