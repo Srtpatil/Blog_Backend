@@ -3,6 +3,7 @@ const passportJWT = require("passport-jwt");
 const LocalStrategy = require("passport-local").Strategy;
 const JwtStrategy = passportJWT.Strategy;
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const FacebookStrategy = require("passport-facebook").Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 const User = require("../models/user.model");
 require("dotenv").config();
@@ -79,6 +80,69 @@ passport.use(
           name: profile.displayName,
           email: profile.emails[0].value,
           username: Math.random(36).toString(36).substr(2, 7),
+        });
+
+        if (newUser) {
+          return done(null, newUser);
+        }
+      } else {
+        return done(null, user);
+      }
+    }
+  )
+);
+
+// serialize the user.id to save in the cookie session
+// so the browser will remember the user when login
+passport.serializeUser((user, done) => {
+  done(null, user.socialId);
+});
+
+// deserialize the cookieUserId to user in the database
+passport.deserializeUser(async (id, done) => {
+  const user = await User.findOne({
+    where: {
+      socialId: id,
+    },
+  }).catch((err) => {
+    done(new Error("Failed to deserialize an user"));
+  });
+
+  if (user) {
+    done(null, user);
+  }
+
+  // User.findById(id)
+  //   .then(user => {
+  //     done(null, user);
+  //   })
+  //   .catch(e => {
+  //     done(new Error("Failed to deserialize an user"));
+  //   });
+});
+
+// Facebook strategy
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: process.env.FACEBOOK_CLIENT_ID,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+      callbackURL: process.env.CALLBACK_URL_FACEBOOK,
+      profileFields: ["id", "displayName", "email", "picture.type(large)"],
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      const user = await User.findOne({
+        where: {
+          socialId: profile.id,
+        },
+      });
+      if (!user) {
+        console.log("Creating new User");
+        const newUser = await await User.create({
+          name: profile.displayName,
+          email: profile.emails[0].value,
+          username: Math.random(36).toString(36).substr(2, 7),
+          socialId: profile.id,
         });
 
         if (newUser) {
