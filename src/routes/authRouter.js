@@ -70,7 +70,7 @@ router.get(
 // Success Auth
 router.get("/login/success", (req, res) => {
   if (req.user) {
-    res.json({
+    return res.json({
       success: true,
       message: "user has successfully authenticated",
       user: req.user,
@@ -86,8 +86,12 @@ router.get("/login/success", (req, res) => {
 
 // When logout, redirect to client
 router.get("/logout", (req, res) => {
-  req.logout();
+  req.logOut();
+  req.session = null;
   res.redirect(process.env.CLIENT_HOME_PAGE_URL);
+  // res.status(200).send({
+  //   loggedout: true,
+  // });
 });
 
 module.exports = router;
