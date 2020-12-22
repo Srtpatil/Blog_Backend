@@ -4,9 +4,33 @@ const LocalStrategy = require("passport-local").Strategy;
 const JwtStrategy = passportJWT.Strategy;
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
+const GithubStrategy = require("passport-github2").Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 const User = require("../models/user.model");
 require("dotenv").config();
+
+const callback = async (accessToken, refreshToken, profile, done) => {
+  const user = await User.findOne({
+    where: {
+      socialId: profile.id,
+    },
+  });
+  if (!user) {
+    console.log("Creating new User");
+    const newUser = await await User.create({
+      name: profile.displayName,
+      email: profile.emails[0].value,
+      username: Math.random(36).toString(36).substr(2, 7),
+      socialId: profile.id,
+    });
+
+    if (newUser) {
+      return done(null, newUser);
+    }
+  } else {
+    return done(null, user);
+  }
+};
 
 // This is for protected routes
 passport.use(
@@ -31,7 +55,7 @@ passport.use(
     }
   )
 );
-
+// Local Strategy
 passport.use(
   new LocalStrategy(
     {
@@ -61,37 +85,6 @@ passport.use(
   )
 );
 
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.CALLBACK_URL,
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      const user = await User.findOne({
-        where: {
-          email: profile.emails[0].value,
-        },
-      });
-
-      if (!user) {
-        const newUser = await await User.create({
-          name: profile.displayName,
-          email: profile.emails[0].value,
-          username: Math.random(36).toString(36).substr(2, 7),
-        });
-
-        if (newUser) {
-          return done(null, newUser);
-        }
-      } else {
-        return done(null, user);
-      }
-    }
-  )
-);
-
 // serialize the user.id to save in the cookie session
 // so the browser will remember the user when login
 passport.serializeUser((user, done) => {
@@ -111,15 +104,19 @@ passport.deserializeUser(async (id, done) => {
   if (user) {
     done(null, user);
   }
-
-  // User.findById(id)
-  //   .then(user => {
-  //     done(null, user);
-  //   })
-  //   .catch(e => {
-  //     done(new Error("Failed to deserialize an user"));
-  //   });
 });
+
+// Google Strategy
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.CALLBACK_URL_GOOGLE,
+    },
+    callback
+  )
+);
 
 // Facebook strategy
 passport.use(
@@ -130,27 +127,19 @@ passport.use(
       callbackURL: process.env.CALLBACK_URL_FACEBOOK,
       profileFields: ["id", "displayName", "email", "picture.type(large)"],
     },
-    async (accessToken, refreshToken, profile, done) => {
-      const user = await User.findOne({
-        where: {
-          socialId: profile.id,
-        },
-      });
-      if (!user) {
-        console.log("Creating new User");
-        const newUser = await await User.create({
-          name: profile.displayName,
-          email: profile.emails[0].value,
-          username: Math.random(36).toString(36).substr(2, 7),
-          socialId: profile.id,
-        });
+    callback
+  )
+);
 
-        if (newUser) {
-          return done(null, newUser);
-        }
-      } else {
-        return done(null, user);
-      }
-    }
+// Github Strategy
+passport.use(
+  new GithubStrategy(
+    {
+      clientID: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      callbackURL: process.env.CALLBACK_URL_GITHUB,
+      scope: "user:email",
+    },
+    callback
   )
 );

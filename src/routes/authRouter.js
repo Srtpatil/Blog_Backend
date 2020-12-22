@@ -5,53 +5,21 @@ const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const url = require("url");
 
+// Google router
 router.get(
   "/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
-    session: false,
   })
 );
 
 router.get(
   "/google/redirect",
   passport.authenticate("google", {
-    session: false,
-    // successRedirect: "http://localhost:8887/",
-    // failureRedirect: "http://localhost:8081/google/login/failed",
-  }),
-  (req, res) => {
-    if (req.user) {
-      const token = jwt.sign(req.user.user_id, process.env.JWT_SECRET);
-      let pathname = url.parse(req.url).pathname;
-      res.writable;
-      return res.json({ user: req.user, token });
-    }
-  }
+    successRedirect: process.env.CLIENT_HOME_PAGE_URL,
+    failureRedirect: process.env.LOGIN_FAIL_URL,
+  })
 );
-
-router.get("/google/login/success", (req, res) => {
-  console.log("Success: ", req);
-
-  if (req.user) {
-    return res.json({
-      success: true,
-      message: "User has successfully authenicated",
-      user: req.user,
-    });
-  }
-  return res.status(401).json({
-    success: false,
-    message: "user failed to authenticate.",
-  });
-});
-
-router.get("/google/login/failed", (req, res) => {
-  res.status(401).json({
-    success: false,
-    message: "user failed to authenticate.",
-  });
-});
 
 // Facebook router
 router.get(
@@ -67,7 +35,21 @@ router.get(
   })
 );
 
-// Success Auth
+// Github router
+router.get(
+  "/github",
+  passport.authenticate("github", { scope: ["user:email"] })
+);
+
+router.get(
+  "/github/redirect",
+  passport.authenticate("github", {
+    successRedirect: process.env.CLIENT_HOME_PAGE_URL,
+    failureRedirect: process.env.LOGIN_FAIL_URL,
+  })
+);
+
+// General router
 router.get("/login/success", (req, res) => {
   if (req.user) {
     return res.json({
@@ -84,14 +66,10 @@ router.get("/login/success", (req, res) => {
   });
 });
 
-// When logout, redirect to client
 router.get("/logout", (req, res) => {
   req.logOut();
   req.session = null;
   res.redirect(process.env.CLIENT_HOME_PAGE_URL);
-  // res.status(200).send({
-  //   loggedout: true,
-  // });
 });
 
 module.exports = router;
