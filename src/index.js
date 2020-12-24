@@ -58,6 +58,19 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
 
+// Check authentication
+app.get("/check_auth", (req, res) => {
+  if (req.user) {
+    return res.send({
+      authenticated: true,
+    });
+  }
+
+  res.send({
+    authenticated: false,
+  });
+});
+
 //routes for user
 app.use("/user", userRouter);
 
