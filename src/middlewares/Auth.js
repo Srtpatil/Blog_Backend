@@ -98,11 +98,13 @@ passport.deserializeUser(async (id, done) => {
       socialId: id,
     },
   }).catch((err) => {
-    done(new Error("Failed to deserialize an user"));
+    done(new Error("Failed to deserialize an user"), null);
   });
 
   if (user) {
     done(null, user);
+  } else {
+    done(new Error("Failed to deserialize an user"), null);
   }
 });
 

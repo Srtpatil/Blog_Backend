@@ -24,81 +24,73 @@ function createSummary(content) {
 }
 
 //create a post or draft
-router.post(
-  "/add",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    console.log("HEVBJ ----- ");
-    let { title, content, is_published, user_id, is_drafted } = req.body;
-    const summary = createSummary(content);
-    let post;
-    try {
-      title = title.replace("<br>", "");
-      title = title.replace("<div>", "");
-      title = title.replace("</div>", "");
-
-      post = await Post.create({
-        title,
-        content,
-        summary,
-        is_published,
-        is_drafted,
-        user_id,
-      }).catch((err) => {
-        return res.status(400).send({
-          error: err.message,
-        });
-      });
-
-      return res.status(200).send({
-        post,
-        msg: "Post added Successfully",
-      });
-    } catch (err) {
-      res.status(404).send({
-        error: err.message,
-      });
-    }
-  }
-);
-
-//update a post or draft
-router.patch(
-  "/edit/:postId",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    const post_id = req.params.postId;
-    let { title, content, is_published, is_drafted } = req.body;
+router.post("/add", async (req, res) => {
+  console.log("HEVBJ ----- ");
+  let { title, content, is_published, user_id, is_drafted } = req.body;
+  const summary = createSummary(content);
+  let post;
+  try {
     title = title.replace("<br>", "");
     title = title.replace("<div>", "");
     title = title.replace("</div>", "");
-    const summary = createSummary(content);
-    try {
-      const post = await Post.update(
-        {
-          title: title,
-          content: content,
-          summary: summary,
-          is_published: is_published,
-          is_drafted: is_drafted,
-        },
-        {
-          where: {
-            post_id: post_id,
-          },
-        }
-      ).catch((err) => {
-        console.log(err);
-      });
 
-      return res.status(200).send({
-        msg: "Post Updated Successfully",
+    post = await Post.create({
+      title,
+      content,
+      summary,
+      is_published,
+      is_drafted,
+      user_id,
+    }).catch((err) => {
+      return res.status(400).send({
+        error: err.message,
       });
-    } catch (err) {
-      res.status(400).send(err);
-    }
+    });
+
+    return res.status(200).send({
+      post,
+      msg: "Post added Successfully",
+    });
+  } catch (err) {
+    res.status(404).send({
+      error: err.message,
+    });
   }
-);
+});
+
+//update a post or draft
+router.patch("/edit/:postId", async (req, res) => {
+  const post_id = req.params.postId;
+  let { title, content, is_published, is_drafted } = req.body;
+  title = title.replace("<br>", "");
+  title = title.replace("<div>", "");
+  title = title.replace("</div>", "");
+  const summary = createSummary(content);
+  try {
+    const post = await Post.update(
+      {
+        title: title,
+        content: content,
+        summary: summary,
+        is_published: is_published,
+        is_drafted: is_drafted,
+      },
+      {
+        where: {
+          post_id: post_id,
+        },
+      }
+    ).catch((err) => {
+      console.log(err);
+    });
+
+    return res.status(200).send({
+      msg: "Post Updated Successfully",
+    });
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
 
 //publish a draft
 router.patch("/publish-draft/:postId", async (req, res) => {
@@ -228,43 +220,39 @@ router.get("/allPosts/:userId&:page", async (req, res) => {
 //get all drafts of a user
 
 //delete a post
-router.delete(
-  "/:postId",
-  // passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    console.log("Here!");
-    const post_id = req.params.postId;
-    console.log("BODY: ", req.body);
-    let { blocks } = req.body;
-    for (let i = 0; i < blocks.length; i++) {
-      if (blocks[i].type === "image") {
-        //make a delete request to image service
-        let path = blocks[i].data.file.url;
-        fetch(`${process.env.IMG_API}image/delete?path=${path}`, {
-          method: "DELETE",
-        });
-      }
-    }
-
-    try {
-      const post = await Post.destroy({
-        where: {
-          post_id: post_id,
-        },
-      }).catch((err) => {
-        return res.status(400).send({
-          error: err.message,
-        });
+router.delete("/:postId", async (req, res) => {
+  console.log("Here!");
+  const post_id = req.params.postId;
+  console.log("BODY: ", req.body);
+  let { blocks } = req.body;
+  for (let i = 0; i < blocks.length; i++) {
+    if (blocks[i].type === "image") {
+      //make a delete request to image service
+      let path = blocks[i].data.file.url;
+      fetch(`${process.env.IMG_API}image/delete?path=${path}`, {
+        method: "DELETE",
       });
-
-      return res.status(200).send({
-        msg: "Post Deleted Successfully",
-      });
-    } catch (err) {
-      return res.status(400).send(err);
     }
   }
-);
+
+  try {
+    const post = await Post.destroy({
+      where: {
+        post_id: post_id,
+      },
+    }).catch((err) => {
+      return res.status(400).send({
+        error: err.message,
+      });
+    });
+
+    return res.status(200).send({
+      msg: "Post Deleted Successfully",
+    });
+  } catch (err) {
+    return res.status(400).send(err);
+  }
+});
 
 //get user draft
 router.get("/draft/:userId", async (req, res) => {

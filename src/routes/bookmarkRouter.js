@@ -9,7 +9,7 @@ const User = require("../models/user.model");
 //create bookmark
 router.post(
   "/add",
-  passport.authenticate("jwt", { session: false }),
+  // passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     const { user_id, post_id } = req.body;
 
@@ -31,7 +31,7 @@ router.post(
 //get users all bookmarks
 router.get(
   "/:userId",
-  passport.authenticate("jwt", { session: false }),
+  // passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     const user_id = req.params.userId;
 
@@ -65,48 +65,44 @@ router.get(
 );
 
 // Check if its is in database or not
-router.get(
-  "/isBookmark/:postId&:userId",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    const post_id = req.params.postId;
-    const user_id = req.params.userId;
+router.get("/isBookmark/:postId&:userId", async (req, res) => {
+  const post_id = req.params.postId;
+  const user_id = req.params.userId;
 
-    try {
-      const bookmark = await Bookmark.findOne({
-        where: {
-          [Op.and]: [
-            {
-              post_id: post_id,
-            },
-            {
-              user_id: user_id,
-            },
-          ],
-        },
+  try {
+    const bookmark = await Bookmark.findOne({
+      where: {
+        [Op.and]: [
+          {
+            post_id: post_id,
+          },
+          {
+            user_id: user_id,
+          },
+        ],
+      },
+    });
+
+    if (bookmark) {
+      res.status(200).send({
+        is_bookmarked: true,
       });
-
-      if (bookmark) {
-        res.status(200).send({
-          is_bookmarked: true,
-        });
-      } else {
-        res.status(200).send({
-          is_bookmarked: false,
-        });
-      }
-    } catch (err) {
-      res.status(400).send({
-        error: error.message,
+    } else {
+      res.status(200).send({
+        is_bookmarked: false,
       });
     }
+  } catch (err) {
+    res.status(400).send({
+      error: error.message,
+    });
   }
-);
+});
 
 // delete bookmark
 router.delete(
   "/delete/:postId&:userId",
-  passport.authenticate("jwt", { session: false }),
+  // passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     const post_id = req.params.postId;
     const user_id = req.params.userId;
