@@ -1,40 +1,38 @@
 const express = require("express");
 const User = require("../models/user.model");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
-const passport = require("passport");
+// const passport = require("passport");
 require("dotenv").config();
 
-//create user
-router.post("/add", async (req, res) => {
-  let { name, email, username, password } = req.body;
-  console.log("User info ", req.body);
-  let user;
-  try {
-    user = await User.create({
-      name,
-      email,
-      username,
-      password,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(400);
-    return res.send(err);
-  }
+// //create user
+// router.post("/add", async (req, res) => {
+//   let { name, email, username, password } = req.body;
+//   console.log("User info ", req.body);
+//   let user;
+//   try {
+//     user = await User.create({
+//       name,
+//       email,
+//       username,
+//       password,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(400);
+//     return res.send(err);
+//   }
 
-  res.status(201).send({ user, msg: "User added successfully" });
-});
+//   res.status(201).send({ user, msg: "User added successfully" });
+// });
 
 //update user
 router.patch("/edit/:userId", async (req, res) => {
   const user_id = req.params.userId;
-  const { name, username, description } = req.body;
+  const { name, description } = req.body;
   try {
     const user = User.update(
       {
         name: name,
-        username: username,
         description: description,
       },
       {
@@ -69,7 +67,6 @@ router.get("/me/:userId", async (req, res) => {
 
     return res.status(200).send({
       name: user.name,
-      username: user.username,
       email: user.email,
       description: user.description,
     });
@@ -79,29 +76,29 @@ router.get("/me/:userId", async (req, res) => {
 });
 
 // login user
-router.post("/login", async function (req, res) {
-  passport.authenticate(
-    "local",
-    {
-      session: false,
-    },
-    (err, user, info) => {
-      console.log("USER: ", user, " ", err);
-      if (err || !user) {
-        return res.status(400).json({
-          error: info,
-          user: user,
-        });
-      }
+// router.post("/login", async function (req, res) {
+//   passport.authenticate(
+//     "local",
+//     {
+//       session: false,
+//     },
+//     (err, user, info) => {
+//       console.log("USER: ", user, " ", err);
+//       if (err || !user) {
+//         return res.status(400).json({
+//           error: info,
+//           user: user,
+//         });
+//       }
 
-      const payload = {
-        id: user.user_id,
-      };
+//       const payload = {
+//         id: user.user_id,
+//       };
 
-      const token = jwt.sign(payload, process.env.JWT_SECRET);
-      return res.json({ user, token });
-    }
-  )(req, res);
-});
+//       const token = jwt.sign(payload, process.env.JWT_SECRET);
+//       return res.json({ user, token });
+//     }
+//   )(req, res);
+// });
 
 module.exports = router;

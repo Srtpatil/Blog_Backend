@@ -4,6 +4,7 @@ const { model } = require("../db/Sequelize");
 const Post = require("../models/Post.model");
 const fetch = require("node-fetch");
 const User = require("../models/user.model");
+const sanitizeHtml = require("sanitize-html");
 require("dotenv").config();
 const router = express.Router();
 
@@ -15,7 +16,11 @@ function createSummary(content) {
   for (let i = 0; i < blocks.length; i++) {
     if (blocks[i].type == "paragraph") {
       firstParagraphText = blocks[i].data.text;
-      return firstParagraphText.replace("<br>", "");
+      let cleanedText = sanitizeHtml(firstParagraphText, {
+        allowedTags: [],
+        allowedAttributes: {},
+      });
+      return cleanedText;
     }
   }
 
@@ -92,48 +97,7 @@ router.patch("/edit/:postId", async (req, res) => {
   }
 });
 
-//publish a draft
-router.patch("/publish-draft/:postId", async (req, res) => {
-  const post_id = req.params.postId;
 
-  try {
-    await Post.update(
-      {
-        is_published: true,
-      },
-      {
-        post_id: post_id,
-      }
-    );
-
-    return res.status(200).send({
-      msg: "Draft Published Successfully",
-    });
-  } catch (err) {
-    res.status(404).send(err);
-  }
-});
-
-//unpublish a draft
-router.patch("/unpublish-draft/:postId", async (req, res) => {
-  const post_id = req.params.postId;
-  try {
-    await Post.update(
-      {
-        is_published: false,
-      },
-      {
-        post_id: post_id,
-      }
-    );
-
-    return res.status(200).send({
-      msg: "Draft Unpublished Successfully",
-    });
-  } catch (err) {
-    res.status(404).send(err);
-  }
-});
 
 //get the latest posts
 router.get("/latest_posts/:page", async (req, res) => {
@@ -254,7 +218,7 @@ router.delete("/:postId", async (req, res) => {
   }
 });
 
-//get user draft
+//get user's all drafts
 router.get("/draft/:userId", async (req, res) => {
   const user_id = req.params.userId;
   try {

@@ -9,7 +9,6 @@ const User = require("../models/user.model");
 //create bookmark
 router.post(
   "/add",
-  // passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     const { user_id, post_id } = req.body;
 
@@ -31,7 +30,6 @@ router.post(
 //get users all bookmarks
 router.get(
   "/:userId",
-  // passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     const user_id = req.params.userId;
 
@@ -102,7 +100,6 @@ router.get("/isBookmark/:postId&:userId", async (req, res) => {
 // delete bookmark
 router.delete(
   "/delete/:postId&:userId",
-  // passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     const post_id = req.params.postId;
     const user_id = req.params.userId;
