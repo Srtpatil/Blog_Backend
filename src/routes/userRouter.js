@@ -28,12 +28,13 @@ require("dotenv").config();
 //update user
 router.patch("/edit/:userId", async (req, res) => {
   const user_id = req.params.userId;
-  const { name, description } = req.body;
+  const { name, description, profilePicPath } = req.body;
   try {
     const user = User.update(
       {
         name: name,
         description: description,
+        profilePicPath: profilePicPath,
       },
       {
         where: { user_id: user_id },

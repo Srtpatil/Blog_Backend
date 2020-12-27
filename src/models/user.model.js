@@ -27,10 +27,10 @@ const User = sequelize.define("user", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
-  isSuperUser : {
+  isSuperUser: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
-  }
+  },
 });
 
 //Add user authenticate method
