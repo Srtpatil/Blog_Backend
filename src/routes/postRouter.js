@@ -103,7 +103,7 @@ router.patch("/edit/:postId", async (req, res) => {
 router.get("/latest_posts/:page", async (req, res) => {
   const page = req.params.page;
   try {
-    const posts = await Post.findAll({
+    const posts = await Post.findAndCountAll({
       where: { is_published: true },
       include: [{ model: User }],
       offset: (page - 1) * 10,
@@ -117,7 +117,7 @@ router.get("/latest_posts/:page", async (req, res) => {
       });
     }
 
-    return res.send(posts);
+    return res.send({ posts: posts.rows, totalPosts: posts.count });
   } catch (err) {
     res.status(400).send(err);
   }
@@ -240,6 +240,27 @@ router.get("/draft/:userId", async (req, res) => {
     return res.send(posts);
   } catch (err) {
     res.status(400).send(err);
+  }
+});
+
+// Like a post
+router.post("/like/:postId", async (req, res) => {
+  const post_id = req.params.postId;
+  try {
+    const post = await Post.increment("likes", {
+      where: {
+        post_id: post_id,
+      },
+    });
+
+    console.log(post);
+
+    return res.status(200).send({
+      msg: "Post Liked",
+      likes: post.likes,
+    });
+  } catch (err) {
+    res.status(404).send(err);
   }
 });
 

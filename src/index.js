@@ -45,6 +45,7 @@ app.use(passport.initialize());
 // deserialize cookie from the browser
 app.use(passport.session());
 
+const whitelist = [process.env.CLIENT_HOME_PAGE_URL, process.env.IMAGE_SERVICE];
 // set up cors to allow us to accept requests from our client
 app.use(
   cors({
@@ -61,6 +62,8 @@ app.use(express.json());
 // Check authentication
 app.get("/check_auth", (req, res) => {
   if (req.user) {
+    console.log("Authentication Called....");
+    console.log(req.user);
     return res.send({
       authenticated: true,
     });

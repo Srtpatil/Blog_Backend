@@ -24,14 +24,19 @@ const User = sequelize.define("user", {
   },
   description: DataTypes.TEXT,
   isWriter: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
+    type: DataTypes.INTEGER,
+    defaultValue: -1,
   },
   isSuperUser: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
 });
+
+// Iswriter
+//-1 not  a writer
+// 0 applied for review
+// 1 verified writer
 
 //Add user authenticate method
 // User.authenticate = async (email, password) => {
