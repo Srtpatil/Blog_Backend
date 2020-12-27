@@ -69,7 +69,9 @@ router.get("/login/success", (req, res) => {
 router.get("/logout", (req, res) => {
   req.logOut();
   req.session = null;
-  res.redirect(process.env.CLIENT_HOME_PAGE_URL);
+  res.status(200).send({
+    msg: "Logged out",
+  });
 });
 
 module.exports = router;
