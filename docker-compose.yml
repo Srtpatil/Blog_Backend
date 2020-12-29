@@ -1,0 +1,35 @@
+version: "3.5"
+services:
+  backend:
+    container_name: backend-server
+    restart: always
+    build: .
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+    volumes:
+      - .:/usr/src
+    networks: 
+      - backend
+    command: sh -c "./wait-for.sh mysql:3306 -- /usr/src/node_modules/.bin/nodemon src/index.js"
+    # command: ./wait-for.sh mysql:3306 -- /usr/src/node_modules/.bin/nodemon src/index.js
+
+  mysql:
+    image: mysql
+    container_name: backend-database
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: Blogdb
+      MYSQL_USER: optimizeit
+      MYSQL_PASSWORD: admin
+    volumes:
+      - ./Database:/var/lib/mysql
+    networks: 
+      - backend
+    ports:
+      - "3308:3306"
+
+networks: 
+  backend:
+    name: backend_network
