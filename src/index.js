@@ -37,7 +37,7 @@ app.use(
   cookieSession({
     name: "session",
     keys: [process.env.COOKIE_KEY],
-    maxAge: 24 * 60 * 60 * 100,
+    maxAge: 5 * 60 * 100,
   })
 );
 
@@ -62,8 +62,6 @@ app.use(express.json());
 // Check authentication
 app.get("/check_auth", (req, res) => {
   if (req.user) {
-    console.log("Authentication Called....");
-    console.log(req.user);
     return res.send({
       authenticated: true,
     });
