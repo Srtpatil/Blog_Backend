@@ -97,8 +97,6 @@ router.patch("/edit/:postId", async (req, res) => {
   }
 });
 
-
-
 //get the latest posts
 router.get("/latest_posts/:page", async (req, res) => {
   const page = req.params.page;
@@ -160,7 +158,7 @@ router.get("/allPosts/:userId&:page", async (req, res) => {
       });
     }
 
-    const posts = await Post.findAll({
+    const posts = await Post.findAndCountAll({
       where: {
         user_id: user_id,
         is_published: true,
@@ -219,14 +217,17 @@ router.delete("/:postId", async (req, res) => {
 });
 
 //get user's all drafts
-router.get("/draft/:userId", async (req, res) => {
+router.get("/draft/:userId&:page", async (req, res) => {
   const user_id = req.params.userId;
+  const page = req.params.page;
   try {
-    const posts = await Post.findAll({
+    const posts = await Post.findAndCountAll({
       where: {
         user_id: user_id,
         is_drafted: true,
       },
+      offset: (page - 1) * 10,
+      limit: 10,
       order: [["updatedAt", "DESC"]],
       include: [{ model: User }],
     });
