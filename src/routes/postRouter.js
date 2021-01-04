@@ -84,7 +84,7 @@ router.patch("/edit/:postId", async (req, res) => {
         },
       }
     ).catch((err) => {
-      console.log(err);
+      res.status(400).send(err);
     });
 
     return res.status(200).send({
@@ -252,7 +252,7 @@ router.post("/like/:postId", async (req, res) => {
       },
     });
 
-    console.log(post);
+    // console.log(post);
 
     return res.status(200).send({
       msg: "Post Liked",
