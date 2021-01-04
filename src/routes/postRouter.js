@@ -189,7 +189,7 @@ router.delete("/:postId", async (req, res) => {
     if (blocks[i].type === "image") {
       //make a delete request to image service
       let path = blocks[i].data.file.url;
-      fetch(`${process.env.IMG_API}image/delete?path=${path}`, {
+      fetch(`${process.env.IMAGE_SERVICE}/image/delete?path=${path}`, {
         method: "DELETE",
       });
     }
