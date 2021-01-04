@@ -1,5 +1,4 @@
 const express = require("express");
-const passport = require("passport");
 const { Op } = require("sequelize");
 const router = express.Router();
 const Bookmark = require("../models/Bookmark.model");

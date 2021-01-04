@@ -1,9 +1,6 @@
 const express = require("express");
-const User = require("../models/user.model");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
 const passport = require("passport");
-const url = require("url");
 
 // Google router
 router.get(

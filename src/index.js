@@ -27,10 +27,6 @@ Bookmark.belongsTo(User, { foreignKey: "user_id" });
 Post.hasMany(Bookmark, { foreignKey: "post_id" });
 Bookmark.belongsTo(Post, { foreignKey: "post_id" });
 
-//A user can have many tokens
-// User.hasMany(AuthToken, { foreignKey: "user_id" });
-// AuthToken.belongsTo(User, { foreignKey: "user_id" });
-
 const app = express();
 
 app.use(
