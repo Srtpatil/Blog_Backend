@@ -1,5 +1,4 @@
 const express = require("express");
-const passport = require("passport");
 const { Op } = require("sequelize");
 const router = express.Router();
 const Bookmark = require("../models/Bookmark.model");
@@ -48,7 +47,7 @@ router.get("/bm/:userId&:page", async (req, res) => {
   // console.log("HERE!");
   const user_id = req.params.userId;
   const page = req.params.page;
-  console.log(user_id, " -- ", page);
+  // console.log(user_id, " -- ", page);
   try {
     let bookmarkedPosts = await Bookmark.findAndCountAll({
       where: {
@@ -60,7 +59,7 @@ router.get("/bm/:userId&:page", async (req, res) => {
       order: [["updatedAt", "DESC"]],
     });
 
-    console.log("bm posts: ", bookmarkedPosts);
+    // console.log("bm posts: ", bookmarkedPosts);
     let bookmarkedPostsWithAuthor = [];
 
     for (let i = 0; i < bookmarkedPosts.rows.length; i++) {

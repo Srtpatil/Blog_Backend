@@ -12,7 +12,7 @@ const callback = async (accessToken, refreshToken, profile, done) => {
     },
   });
   if (!user) {
-    console.log("Creating new User");
+    // console.log("Creating new User");
     const newUser = await await User.create({
       name: profile.displayName,
       email: profile.emails[0].value,

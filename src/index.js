@@ -27,17 +27,13 @@ Bookmark.belongsTo(User, { foreignKey: "user_id" });
 Post.hasMany(Bookmark, { foreignKey: "post_id" });
 Bookmark.belongsTo(Post, { foreignKey: "post_id" });
 
-//A user can have many tokens
-// User.hasMany(AuthToken, { foreignKey: "user_id" });
-// AuthToken.belongsTo(User, { foreignKey: "user_id" });
-
 const app = express();
 
 app.use(
   cookieSession({
     name: "session",
     keys: [process.env.COOKIE_KEY],
-    maxAge: 30 * 24 * 60 * 60 * 1000,
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 1 month cookie expiration date
   })
 );
 

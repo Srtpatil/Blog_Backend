@@ -1,6 +1,4 @@
 const express = require("express");
-const passport = require("passport");
-const { model } = require("../db/Sequelize");
 const Post = require("../models/Post.model");
 const fetch = require("node-fetch");
 const User = require("../models/user.model");
@@ -30,7 +28,7 @@ function createSummary(content) {
 
 //create a post or draft
 router.post("/add", async (req, res) => {
-  console.log("HEVBJ ----- ");
+  // console.log("HEVBJ ----- ");
   let { title, content, is_published, user_id, is_drafted } = req.body;
   const summary = createSummary(content);
   let post;
@@ -86,7 +84,7 @@ router.patch("/edit/:postId", async (req, res) => {
         },
       }
     ).catch((err) => {
-      console.log(err);
+      res.status(400).send(err);
     });
 
     return res.status(200).send({
@@ -183,15 +181,15 @@ router.get("/allPosts/:userId&:page", async (req, res) => {
 
 //delete a post
 router.delete("/:postId", async (req, res) => {
-  console.log("Here!");
+  // console.log("Here!");
   const post_id = req.params.postId;
-  console.log("BODY: ", req.body);
+  // console.log("BODY: ", req.body);
   let { blocks } = req.body;
   for (let i = 0; i < blocks.length; i++) {
     if (blocks[i].type === "image") {
       //make a delete request to image service
       let path = blocks[i].data.file.url;
-      fetch(`${process.env.IMG_API}image/delete?path=${path}`, {
+      fetch(`${process.env.IMAGE_SERVICE}/image/delete?path=${path}`, {
         method: "DELETE",
       });
     }
@@ -254,7 +252,7 @@ router.post("/like/:postId", async (req, res) => {
       },
     });
 
-    console.log(post);
+    // console.log(post);
 
     return res.status(200).send({
       msg: "Post Liked",
