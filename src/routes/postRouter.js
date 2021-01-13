@@ -3,6 +3,7 @@ const Post = require("../models/Post.model");
 const fetch = require("node-fetch");
 const User = require("../models/user.model");
 const sanitizeHtml = require("sanitize-html");
+const { DeletionQueue } = require("./imageRouter");
 require("dotenv").config();
 const router = express.Router();
 
@@ -188,15 +189,16 @@ router.delete("/:postId", async (req, res) => {
   for (let i = 0; i < blocks.length; i++) {
     if (blocks[i].type === "image") {
       //make a delete request to image service
-      let path = blocks[i].data.file.url;
-      fetch(`${process.env.IMAGE_SERVICE}/image/delete?path=${path}`, {
-        method: "DELETE",
-      });
+      const path = blocks[i].data.file.url;
+      // fetch(`${process.env.IMAGE_SERVICE}/image/delete?path=${path}`, {
+      //   method: "DELETE",
+      // });
+      DeletionQueue.add({ path: path, local: false });
     }
   }
 
   try {
-    const post = await Post.destroy({
+    await Post.destroy({
       where: {
         post_id: post_id,
       },

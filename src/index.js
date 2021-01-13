@@ -10,6 +10,7 @@ const userRouter = require("./routes/userRouter");
 const postRouter = require("./routes/postRouter");
 const bookmarkRouter = require("./routes/bookmarkRouter");
 const authRouter = require("./routes/authRouter");
+const { imageRouter } = require("./routes/imageRouter");
 const passport = require("passport");
 const cookieSession = require("cookie-session");
 require("./middlewares/Auth");
@@ -55,6 +56,9 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
 
+//public directory to store images
+app.use(express.static("public"));
+
 // Check authentication
 app.get("/check_auth", (req, res) => {
   if (req.user) {
@@ -79,6 +83,9 @@ app.use("/bookmark", bookmarkRouter);
 
 //routes for auth
 app.use("/auth", authRouter);
+
+//routes for images
+app.use("/image", imageRouter);
 
 //start the server
 const port = process.env.PORT || 8081;
