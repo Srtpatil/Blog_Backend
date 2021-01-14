@@ -1,37 +1,48 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../db/Sequelize");
 
-const User = sequelize.define("user", {
-  user_id: {
-    type: DataTypes.UUID,
-    primaryKey: true,
-    defaultValue: Sequelize.UUIDV1,
+const User = sequelize.define(
+  "user",
+  {
+    user_id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: Sequelize.UUIDV1,
+    },
+    socialId: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    profilePicPath: {
+      type: DataTypes.STRING,
+    },
+    description: DataTypes.TEXT,
+    isWriter: {
+      type: DataTypes.INTEGER,
+      defaultValue: -1,
+    },
+    isSuperUser: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
-  socialId: {
-    type: DataTypes.STRING,
-    primaryKey: true,
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  profilePicPath: {
-    type: DataTypes.STRING,
-  },
-  description: DataTypes.TEXT,
-  isWriter: {
-    type: DataTypes.INTEGER,
-    defaultValue: -1,
-  },
-  isSuperUser: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-});
+  {
+    indexes: [
+      {
+        fields: ["socialId"],
+        unique: true,
+      },
+    ],
+  }
+);
 
 // Iswriter
 //-1 not  a writer

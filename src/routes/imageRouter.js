@@ -65,9 +65,12 @@ const blobServiceClient = new BlobServiceClient(
 
 router.post("/upload", upload.single("image"), async (req, res, next) => {
   //check authentication
-  const { filename: image } = req.file;
-  const originalFilePath = req.file.path;
   try {
+    if (req.user === undefined) {
+      throw new Error("User not authenticated");
+    }
+    const { filename: image } = req.file;
+    const originalFilePath = req.file.path;
     const destinationPath =
       process.env.IMG_API + "resized/" + req.file.filename;
     sharp(req.file.path)
@@ -146,6 +149,8 @@ DeletionQueue.process(async (job) => {
       ""
     );
 
+    // console.log("Deleting image in azure..");
+
     const containerClient = blobServiceClient.getContainerClient(
       containerName1
     );
@@ -162,11 +167,17 @@ DeletionQueue.process(async (job) => {
 
 // Add to deletion queue
 router.delete("/delete", async (req, res) => {
-  const { path } = req.query;
-  DeletionQueue.add({ path: path, local: false });
-  res.status(200).send({
-    msg: "Added for processing",
-  });
+  if (req.user === undefined) {
+    return res.status(400).send({
+      msg: "User Not Authenticated",
+    });
+  } else {
+    const { path } = req.query;
+    DeletionQueue.add({ path: path, local: false });
+    res.status(200).send({
+      msg: "Added for processing",
+    });
+  }
 });
 
 module.exports = { imageRouter: router, DeletionQueue };
