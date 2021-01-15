@@ -1,4 +1,4 @@
-require('dotenv').config()
+require("dotenv").config();
 
 module.exports = {
   HOST: process.env.DB_HOST,
@@ -6,4 +6,5 @@ module.exports = {
   PASSWORD: process.env.DB_PASS,
   DB: "Blogdb",
   dialect: "mysql",
+  logging: false,
 };
